@@ -212,7 +212,8 @@ export const processImage = async (file, operation, settings) => {
                         processedSize: blob.size,
                         dimensions: `${targetWidth}×${targetHeight}`,
                         previewUrl: URL.createObjectURL(blob),
-                        originalPreviewUrl: URL.createObjectURL(file)
+                        originalPreviewUrl: URL.createObjectURL(file),
+                        altText: file.altText || file.name.replace(/\.[^/.]+$/, '') || 'Image'
                     });
                 },
                 mimeType,

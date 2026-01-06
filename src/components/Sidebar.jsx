@@ -84,6 +84,14 @@ const Sidebar = ({ operation, setOperation, settings, setSettings, onProcess, on
                     <span>Upscale</span>
                     {operation === 'upscale' && <motion.div layoutId="activeTab" className="active-indicator" />}
                 </button>
+                <button
+                    onClick={() => setOperation('generate-alt')}
+                    className={`nav-item ${operation === 'generate-alt' ? 'active' : ''}`}
+                >
+                    <ImageIcon size={20} />
+                    <span>Generate ALT</span>
+                    {operation === 'generate-alt' && <motion.div layoutId="activeTab" className="active-indicator" />}
+                </button>
 
             </nav>
 
@@ -245,7 +253,75 @@ const Sidebar = ({ operation, setOperation, settings, setSettings, onProcess, on
                             </div>
                         )}
 
-                        {/* Common Resize Controls */}
+                        {operation === 'generate-alt' && (
+                            <div className="settings-group">
+                                <label className="setting-label">ALT Tag Intelligence</label>
+                                <div 
+                                    className="glass-panel" 
+                                    style={{ 
+                                        background: 'rgba(255,255,255,0.05)',
+                                        padding: '1.25rem',
+                                        marginTop: '0.75rem',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: '0.75rem'
+                                    }}
+                                >
+                                    <p 
+                                        className="text-sm text-muted"
+                                        style={{
+                                            margin: 0,
+                                            lineHeight: '1.5',
+                                            padding: 0
+                                        }}
+                                    >
+                                        Analyzes image content and metadata to generate descriptive ALT tags for better accessibility and SEO.
+                                    </p>
+                                    <div 
+                                        className="flex items-center gap-2 text-xs text-secondary"
+                                        style={{
+                                            marginTop: '0.25rem',
+                                            padding: '0.5rem 0.75rem',
+                                            background: 'rgba(236, 72, 153, 0.1)',
+                                            borderRadius: '6px',
+                                            border: '1px solid rgba(236, 72, 153, 0.2)'
+                                        }}
+                                    >
+                                        <ImageIcon size={14} />
+                                        <span style={{ fontWeight: 600 }}>SEO Optimized Generation</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Common Options */}
+                        <div className="divider" />
+                        <div className="settings-group">
+                            <label className="setting-label">Options</label>
+                            <div className="flex flex-col gap-3">
+                                <label className="toggle-label flex items-center justify-between">
+                                    <span className="text-sm text-muted">Auto-generate ALT</span>
+                                    <div className="relative inline-flex items-center cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            className="hidden"
+                                            checked={settings.options?.autoGenerateAlt ?? true}
+                                            onChange={(e) => setSettings({
+                                                ...settings,
+                                                options: { ...settings.options, autoGenerateAlt: e.target.checked }
+                                            })}
+                                        />
+                                        <div className={`w-10 h-5 rounded-full transition-colors ${settings.options?.autoGenerateAlt ? 'bg-primary' : 'bg-slate-700'}`}>
+                                            <motion.div 
+                                                className="w-3 h-3 bg-white rounded-full absolute top-1 left-1"
+                                                animate={{ x: settings.options?.autoGenerateAlt ? 20 : 0 }}
+                                            />
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
                         <div className="divider" />
                         <div className="settings-group">
                             <div className="flex justify-between items-center mb-3">
@@ -317,7 +393,8 @@ const Sidebar = ({ operation, setOperation, settings, setSettings, onProcess, on
                             {operation === 'convert' ? 'Convert Images' :
                                 operation === 'compress' ? 'Compress Images' :
                                 operation === 'upscale' ? 'Upscale Images' :
-                                    'Remove Background'}
+                                    operation === 'generate-alt' ? 'Update ALT Tags' :
+                                        'Remove Background'}
                         </span>
                     )}
                 </motion.button>

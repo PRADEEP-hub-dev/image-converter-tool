@@ -49,7 +49,7 @@ const ImagePreviewModal = ({ file, onClose }) => {
                         }}>
                             <img
                                 src={file.previewUrl}
-                                alt={file.fileName}
+                                alt={file.altText || file.fileName}
                                 style={{ 
                                     transform: `scale(${scale})`, 
                                     transition: 'transform 0.2s', 

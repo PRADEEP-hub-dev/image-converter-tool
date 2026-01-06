@@ -114,7 +114,7 @@ const Results = ({ processedFiles, onReset }) => {
                             <div className="compare-half" style={{ borderRight: '1px solid var(--border)' }}>
                                 <img
                                     src={file.originalPreviewUrl}
-                                    style={{ 
+                                    style={{
                                         opacity: 0.5,
                                         width: '100%',
                                         height: '100%',
@@ -123,7 +123,7 @@ const Results = ({ processedFiles, onReset }) => {
                                         maxWidth: '100%',
                                         maxHeight: '100%'
                                     }}
-                                    alt="Original"
+                                    alt={file.altText ? `Original: ${file.altText}` : 'Original image'}
                                 />
                                 <span className="text-xs" style={{ position: 'absolute', top: '8px', left: '8px', background: 'rgba(0,0,0,0.5)', padding: '2px 6px', borderRadius: '4px', color: '#ccc' }}>Original</span>
                             </div>
@@ -138,7 +138,7 @@ const Results = ({ processedFiles, onReset }) => {
                                         maxWidth: '100%',
                                         maxHeight: '100%'
                                     }}
-                                    alt="Processed"
+                                    alt={file.altText || 'Processed image'}
                                 />
                                 <span className="text-xs" style={{ position: 'absolute', top: '8px', right: '8px', background: 'var(--success)', padding: '2px 6px', borderRadius: '4px', color: 'white', fontWeight: 'bold' }}>New</span>
                             </div>
@@ -159,11 +159,32 @@ const Results = ({ processedFiles, onReset }) => {
                                 <span className="text-xs text-muted font-mono">{file.dimensions}</span>
                             </div>
 
-                            <div className="flex justify-between items-center text-sm" style={{ marginBottom: '1rem' }}>
+                            <div className="flex justify-between items-center text-sm" style={{ marginBottom: '0.75rem' }}>
                                 <span className="text-muted" style={{ textDecoration: 'line-through' }}>{formatFileSize(file.originalSize)}</span>
                                 <span className="text-success font-bold">{formatFileSize(file.processedSize)}</span>
                             </div>
 
+                            {file.altText && (
+                                <div
+                                    className="text-xs"
+                                    style={{
+                                        marginBottom: '1rem',
+                                        padding: '6px 10px',
+                                        background: 'rgba(99, 102, 241, 0.1)',
+                                        borderRadius: '6px',
+                                        border: '1px solid rgba(99, 102, 241, 0.2)',
+                                        color: 'var(--text-main)',
+                                        fontStyle: 'italic',
+                                        display: 'flex',
+                                        gap: '6px'
+                                    }}
+                                >
+                                    <span style={{ opacity: 0.7 }}>🏷️</span>
+                                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={`Generated ALT: ${file.altText}`}>
+                                        {file.altText}
+                                    </span>
+                                </div>
+                            )}
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => setPreviewFile(file)}

@@ -26,7 +26,7 @@ const ImageGrid = ({ files, onRemove }) => {
                         <div className="image-preview">
                             <img
                                 src={URL.createObjectURL(file)}
-                                alt={file.name}
+                                alt={file.altText || file.name}
                                 onLoad={(e) => URL.revokeObjectURL(e.target.src)}
                                 style={{
                                     width: '100%',
@@ -42,6 +42,24 @@ const ImageGrid = ({ files, onRemove }) => {
                         <div className="text-left">
                             <p className="font-medium text-sm" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={file.name}>{file.name}</p>
                             <p className="text-xs text-muted">{formatFileSize(file.size)}</p>
+                            {file.altText && (
+                                <p 
+                                    className="text-xs" 
+                                    style={{ 
+                                        marginTop: '4px',
+                                        color: 'var(--accent-cyan)',
+                                        fontStyle: 'italic',
+                                        opacity: 0.9,
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                        fontSize: '0.7rem'
+                                    }}
+                                    title={`ALT: ${file.altText}`}
+                                >
+                                    🏷️ {file.altText}
+                                </p>
+                            )}
                         </div>
                     </motion.div>
                 ))}
