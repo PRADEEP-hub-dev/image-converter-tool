@@ -206,14 +206,14 @@ function App() {
                 onReset={handleReset}
               />
             ) : (
-              <motion.div
-                key="workspace"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-                style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}
-              >
+                <motion.div
+                  key="workspace"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  style={{ display: 'flex', flexDirection: 'column', gap: '2rem', padding: '10px', overflow: 'visible' }}
+                >
                 {files.length === 0 ? (
                   <UploadArea onFilesSelected={handleFilesSelected} />
                 ) : (

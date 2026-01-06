@@ -545,7 +545,6 @@ h3 {
 
 .glass-panel-enhanced:hover {
   border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
   box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
 }
 
@@ -589,7 +588,6 @@ h3 {
 .upload-area-enhanced:hover {
   border-color: var(--primary);
   background: rgba(99, 102, 241, 0.05);
-  transform: scale(1.02);
   box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
 }
 
@@ -795,7 +793,8 @@ h3 {
 .main-content {
   flex: 1;
   overflow-y: auto;
-  padding-right: 1rem;
+  padding: 1rem 1.5rem 2rem 1rem;
+  /* Added padding for scale animation headroom */
   position: relative;
 }
 

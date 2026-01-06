@@ -66,7 +66,6 @@ const Results = ({ processedFiles, onReset }) => {
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="container"
         >
             <div className="text-center" style={{ marginBottom: '2rem' }}>
                 <div style={{
