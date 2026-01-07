@@ -294,90 +294,78 @@ const Sidebar = ({ operation, setOperation, settings, setSettings, onProcess, on
                             </div>
                         )}
 
-                        {/* Common Options */}
-                        <div className="divider" />
-                        <div className="settings-group">
-                            <label className="setting-label">Options</label>
-                            <div className="flex flex-col gap-3">
-                                <label className="toggle-label flex items-center justify-between" style={{ userSelect: 'none', cursor: 'pointer' }}>
-                                    <span className="text-sm text-muted">Auto-generate ALT</span>
-                                    <div className="relative inline-flex items-center cursor-pointer" style={{ width: '40px', height: '20px' }}>
-                                        <input
-                                            type="checkbox"
-                                            style={{
-                                                position: 'absolute',
-                                                top: 0,
-                                                left: 0,
-                                                width: '100%',
-                                                height: '100%',
-                                                opacity: 0,
-                                                zIndex: 10,
-                                                cursor: 'pointer',
-                                                margin: 0
-                                            }}
-                                            checked={settings.options?.autoGenerateAlt ?? true}
-                                            onChange={(e) => setSettings({
-                                                ...settings,
-                                                options: { ...settings.options, autoGenerateAlt: e.target.checked }
-                                            })}
-                                        />
-                                        <div className={`w-10 h-5 rounded-full transition-colors ${settings.options?.autoGenerateAlt ? 'bg-primary' : 'bg-slate-700'}`} style={{ width: '100%', height: '100%', position: 'relative', borderRadius: '999px' }}>
-                                            <motion.div
-                                                className="bg-white rounded-full absolute"
-                                                animate={{ x: settings.options?.autoGenerateAlt ? 20 : 0 }}
-                                                style={{ width: '14px', height: '14px', top: '3px', left: '3px', borderRadius: '50%' }}
-                                            />
-                                        </div>
-                                    </div>
-                                </label>
-                                <label className="toggle-label flex items-center justify-between" style={{ userSelect: 'none', cursor: 'pointer' }}>
-                                    <span className="text-sm text-muted">Auto-rename files</span>
-                                    <div className="relative inline-flex items-center cursor-pointer" style={{ width: '40px', height: '20px' }}>
-                                        <input
-                                            type="checkbox"
-                                            style={{
-                                                position: 'absolute',
-                                                top: 0,
-                                                left: 0,
-                                                width: '100%',
-                                                height: '100%',
-                                                opacity: 0,
-                                                zIndex: 10,
-                                                cursor: 'pointer',
-                                                margin: 0
-                                            }}
-                                            checked={settings.options?.autoRename ?? true}
-                                            onChange={(e) => setSettings({
-                                                ...settings,
-                                                options: { ...settings.options, autoRename: e.target.checked }
-                                            })}
-                                        />
-                                        <div className={`w-10 h-5 rounded-full transition-colors ${settings.options?.autoRename ? 'bg-primary' : 'bg-slate-700'}`} style={{ width: '100%', height: '100%', position: 'relative', borderRadius: '999px' }}>
-                                            <motion.div
-                                                className="bg-white rounded-full absolute"
-                                                animate={{ x: settings.options?.autoRename ? 20 : 0 }}
-                                                style={{ width: '14px', height: '14px', top: '3px', left: '3px', borderRadius: '50%' }}
-                                            />
-                                        </div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
 
                         <div className="divider" />
                         <div className="settings-group">
                             <div className="flex justify-between items-center mb-3">
                                 <label className="setting-label mb-0">Resize</label>
-                                <label className="toggle-label">
-                                    <input
-                                        type="checkbox"
-                                        checked={settings.resize?.maintainAspectRatio ?? true}
-                                        onChange={(e) => setSettings({
-                                            ...settings,
-                                            resize: { ...settings.resize, maintainAspectRatio: e.target.checked }
-                                        })}
-                                    />
-                                    <span className="text-xs text-muted ml-2">Lock Ratio</span>
+                            </div>
+                            <div className="mb-3">
+                                <label className="toggle-label flex items-center justify-between" style={{ userSelect: 'none', cursor: 'pointer' }}>
+                                    <span className="text-sm text-muted">Rename with ALT text</span>
+                                    <div className="relative inline-flex items-center cursor-pointer" style={{ width: '40px', height: '20px', position: 'relative' }}>
+                                        <input
+                                            type="checkbox"
+                                            style={{
+                                                position: 'absolute',
+                                                top: 0,
+                                                left: 0,
+                                                width: '100%',
+                                                height: '100%',
+                                                opacity: 0,
+                                                zIndex: 10,
+                                                cursor: 'pointer',
+                                                margin: 0
+                                            }}
+                                            checked={settings.options?.renameWithAlt ?? false}
+                                            onChange={(e) => setSettings({
+                                                ...settings,
+                                                options: { ...settings.options, renameWithAlt: e.target.checked }
+                                            })}
+                                        />
+                                        <div className={`w-10 h-5 rounded-full transition-colors ${settings.options?.renameWithAlt ? 'bg-primary' : 'bg-slate-700'}`} style={{ width: '100%', height: '100%', position: 'relative', borderRadius: '999px' }}>
+                                            <motion.div
+                                                className="bg-white rounded-full absolute"
+                                                animate={{ x: settings.options?.renameWithAlt ? 20 : 0 }}
+                                                style={{ width: '14px', height: '14px', top: '3px', left: '3px', borderRadius: '50%' }}
+                                                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                            />
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="text-xs text-muted">Lock Ratio</span>
+                                <label className="toggle-label flex items-center justify-between" style={{ userSelect: 'none', cursor: 'pointer' }}>
+                                    <div className="relative inline-flex items-center cursor-pointer" style={{ width: '40px', height: '20px', position: 'relative' }}>
+                                        <input
+                                            type="checkbox"
+                                            style={{
+                                                position: 'absolute',
+                                                top: 0,
+                                                left: 0,
+                                                width: '100%',
+                                                height: '100%',
+                                                opacity: 0,
+                                                zIndex: 10,
+                                                cursor: 'pointer',
+                                                margin: 0
+                                            }}
+                                            checked={settings.resize?.maintainAspectRatio ?? true}
+                                            onChange={(e) => setSettings({
+                                                ...settings,
+                                                resize: { ...settings.resize, maintainAspectRatio: e.target.checked }
+                                            })}
+                                        />
+                                        <div className={`w-10 h-5 rounded-full transition-colors ${settings.resize?.maintainAspectRatio ? 'bg-primary' : 'bg-slate-700'}`} style={{ width: '100%', height: '100%', position: 'relative', borderRadius: '999px' }}>
+                                            <motion.div
+                                                className="bg-white rounded-full absolute"
+                                                animate={{ x: settings.resize?.maintainAspectRatio ? 20 : 0 }}
+                                                style={{ width: '14px', height: '14px', top: '3px', left: '3px', borderRadius: '50%' }}
+                                                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                            />
+                                        </div>
+                                    </div>
                                 </label>
                             </div>
                             <div className="grid grid-cols-2 gap-2">

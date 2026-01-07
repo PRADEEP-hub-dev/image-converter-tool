@@ -161,52 +161,64 @@ export const generateAltText = async (file) => {
             const visualContext = [];
             if (pixelAnalysis.isVibrant) visualContext.push('vibrant');
             if (pixelAnalysis.tone && !pixelAnalysis.isVibrant) visualContext.push(pixelAnalysis.tone.toLowerCase());
-            if (pixelAnalysis.colorName) visualContext.push(`${pixelAnalysis.colorName} toned`);
+            if (pixelAnalysis.colorName) visualContext.push(pixelAnalysis.colorName); // Removed "toned"
 
             const visualString = visualContext.length > 0 ? visualContext.join(' ') : '';
 
-            // Map categories to descriptive subjects
+            // Map categories to concise subjects (40% shorter)
             const categorySubjects = {
-                portrait: 'portrait showing a person',
-                landscape: 'scenic landscape view',
-                product: 'product display',
-                logo: 'company brand logo',
-                screenshot: 'digital interface screenshot',
-                food: 'prepared food dish',
-                building: 'architectural building',
-                animal: 'animal wildlife',
-                vehicle: 'transportation vehicle',
-                document: 'written document page',
-                artwork: 'creative artwork design',
-                photo: 'photograph'
+                portrait: 'portrait',
+                landscape: 'landscape',
+                product: 'product',
+                logo: 'logo',
+                screenshot: 'screenshot',
+                food: 'food',
+                building: 'building',
+                animal: 'animal',
+                vehicle: 'vehicle',
+                document: 'document',
+                artwork: 'artwork',
+                photo: 'photo'
             };
 
             const subject = categorySubjects[fileAnalysis.category] || 'image';
             const contextName = fileAnalysis.cleanName.length > 3 ? fileAnalysis.cleanName : '';
 
-            // SEO Rule: Combine context (file name) with visual attributes
-            if (contextName && fileAnalysis.category) {
-                // Example: 'Vibrant landscape view of sunset beach'
-                altText = `${visualString} ${subject} of ${contextName}`;
-            } else if (contextName) {
-                // Example: 'Blue toned image of winter mountains'
-                altText = `${visualString} image of ${contextName}`;
-            } else if (fileAnalysis.category) {
-                // Example: 'Dark portrait showing a person'
-                altText = `${visualString} ${subject}`;
-            } else {
-                // Fallback
-                altText = visualString ? `${visualString} abstract image` : 'Descriptive image content';
+            // SEO Rule: Ultra-concise (Max 3-4 words)
+            // Strategy: Visual Adjective + (Specific Name OR Category)
+
+            let parts = [];
+
+            // 1. Add visual context (max 1 word)
+            if (visualString) {
+                // Take only the first word of visual string (e.g. 'vibrant' from 'vibrant red')
+                parts.push(visualString.split(' ')[0]);
             }
 
-            // Clean up: Remove redundant "image of image" or double "photo"
-            altText = altText
-                .replace(/\bimage of image\b/gi, 'image')
-                .replace(/\bphoto of photo\b/gi, 'photograph')
-                .replace(/\s+/g, ' ')
-                .trim();
+            // 2. Add subject (prioritize context name if available, else category)
+            if (contextName) {
+                // If we have a specific name, use it.
+                // Don't append category subject at the back (avoids "sunset beach landscape")
+                parts.push(contextName);
+            } else {
+                parts.push(subject);
+            }
 
-            // Ensure first letter is capitalized and no trailing period (standard for ALT)
+            // Join and clean
+            altText = parts.join(' ').trim();
+
+            // Fallback if empty
+            if (!altText || altText.length < 2) {
+                altText = subject || 'Image';
+            }
+
+            // Enforce hard word limit (max 4 words)
+            const words = altText.split(/\s+/);
+            if (words.length > 4) {
+                altText = words.slice(0, 4).join(' ');
+            }
+
+            // Ensure first letter is capitalized
             altText = altText.charAt(0).toUpperCase() + altText.slice(1);
 
             // Limit to 125 chars (SEO Best Practice)

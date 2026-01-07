@@ -134,7 +134,7 @@ export const processImage = async (file, operation, settings) => {
 
             canvas.width = targetWidth;
             canvas.height = targetHeight;
-            
+
             // Use highest quality smoothing for upscaling
             if (operation === 'upscale') {
                 ctx.imageSmoothingEnabled = true;
@@ -194,13 +194,22 @@ export const processImage = async (file, operation, settings) => {
                     }
 
                     let baseName = file.name;
-                    if (baseName && baseName.lastIndexOf('.') !== -1) {
-                        baseName = baseName.substring(0, baseName.lastIndexOf('.'));
+                    if (settings.options?.renameWithAlt && file.altText && file.altText !== 'Image') {
+                        // Use ALT text as baseName, strictly sanitizing
+                        baseName = file.altText
+                            .replace(/[^a-zA-Z0-9]/g, '_') // Replace non-alphanumeric with underscore
+                            .replace(/_+/g, '_')           // Merge multiple underscores
+                            .replace(/^_|_$/g, '')         // Trim leading/trailing underscores
+                            .substring(0, 50);             // Limit length
+                    } else {
+                        // Standard filename processing
+                        if (baseName && baseName.lastIndexOf('.') !== -1) {
+                            baseName = baseName.substring(0, baseName.lastIndexOf('.'));
+                        }
+                        if (!baseName) baseName = 'image';
+                        // Sanitize filename
+                        baseName = baseName.replace(/[^a-zA-Z0-9._-]/g, '_');
                     }
-                    if (!baseName) baseName = 'image';
-
-                    // Sanitize filename
-                    baseName = baseName.replace(/[^a-zA-Z0-9._-]/g, '_');
 
                     const fileName = `${baseName}_${fileNamePrefix}.${extension}`;
 
@@ -213,7 +222,8 @@ export const processImage = async (file, operation, settings) => {
                         dimensions: `${targetWidth}×${targetHeight}`,
                         previewUrl: URL.createObjectURL(blob),
                         originalPreviewUrl: URL.createObjectURL(file),
-                        altText: file.altText || file.name.replace(/\.[^/.]+$/, '') || 'Image'
+                        altText: file.altText || file.name.replace(/\.[^/.]+$/, '') || 'Image',
+                        suggestedName: file.suggestedName
                     });
                 },
                 mimeType,
