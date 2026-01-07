@@ -171,9 +171,9 @@ const Sidebar = ({ operation, setOperation, settings, setSettings, onProcess, on
                         {operation === 'remove-bg' && (
                             <div className="settings-group">
                                 <label className="setting-label">AI Removal</label>
-                                <div 
-                                    className="glass-panel" 
-                                    style={{ 
+                                <div
+                                    className="glass-panel"
+                                    style={{
                                         background: 'rgba(255,255,255,0.05)',
                                         padding: '1.25rem',
                                         marginTop: '0.75rem',
@@ -182,7 +182,7 @@ const Sidebar = ({ operation, setOperation, settings, setSettings, onProcess, on
                                         gap: '0.75rem'
                                     }}
                                 >
-                                    <p 
+                                    <p
                                         className="text-sm text-muted"
                                         style={{
                                             margin: 0,
@@ -192,7 +192,7 @@ const Sidebar = ({ operation, setOperation, settings, setSettings, onProcess, on
                                     >
                                         Automatically removes image backgrounds using AI. This process runs entirely in your browser.
                                     </p>
-                                    <div 
+                                    <div
                                         className="flex items-center gap-2 text-xs text-accent"
                                         style={{
                                             marginTop: '0.25rem',
@@ -228,9 +228,9 @@ const Sidebar = ({ operation, setOperation, settings, setSettings, onProcess, on
                                         4× Resolution
                                     </button>
                                 </div>
-                                <div 
-                                    className="glass-panel" 
-                                    style={{ 
+                                <div
+                                    className="glass-panel"
+                                    style={{
                                         background: 'rgba(255,255,255,0.05)',
                                         padding: '1rem',
                                         marginTop: '0.75rem',
@@ -239,7 +239,7 @@ const Sidebar = ({ operation, setOperation, settings, setSettings, onProcess, on
                                         gap: '0.5rem'
                                     }}
                                 >
-                                    <p 
+                                    <p
                                         className="text-sm text-muted"
                                         style={{
                                             margin: 0,
@@ -256,9 +256,9 @@ const Sidebar = ({ operation, setOperation, settings, setSettings, onProcess, on
                         {operation === 'generate-alt' && (
                             <div className="settings-group">
                                 <label className="setting-label">ALT Tag Intelligence</label>
-                                <div 
-                                    className="glass-panel" 
-                                    style={{ 
+                                <div
+                                    className="glass-panel"
+                                    style={{
                                         background: 'rgba(255,255,255,0.05)',
                                         padding: '1.25rem',
                                         marginTop: '0.75rem',
@@ -267,7 +267,7 @@ const Sidebar = ({ operation, setOperation, settings, setSettings, onProcess, on
                                         gap: '0.75rem'
                                     }}
                                 >
-                                    <p 
+                                    <p
                                         className="text-sm text-muted"
                                         style={{
                                             margin: 0,
@@ -277,7 +277,7 @@ const Sidebar = ({ operation, setOperation, settings, setSettings, onProcess, on
                                     >
                                         Analyzes image content and metadata to generate descriptive ALT tags for better accessibility and SEO.
                                     </p>
-                                    <div 
+                                    <div
                                         className="flex items-center gap-2 text-xs text-secondary"
                                         style={{
                                             marginTop: '0.25rem',
@@ -299,22 +299,64 @@ const Sidebar = ({ operation, setOperation, settings, setSettings, onProcess, on
                         <div className="settings-group">
                             <label className="setting-label">Options</label>
                             <div className="flex flex-col gap-3">
-                                <label className="toggle-label flex items-center justify-between">
+                                <label className="toggle-label flex items-center justify-between" style={{ userSelect: 'none', cursor: 'pointer' }}>
                                     <span className="text-sm text-muted">Auto-generate ALT</span>
-                                    <div className="relative inline-flex items-center cursor-pointer">
+                                    <div className="relative inline-flex items-center cursor-pointer" style={{ width: '40px', height: '20px' }}>
                                         <input
                                             type="checkbox"
-                                            className="hidden"
+                                            style={{
+                                                position: 'absolute',
+                                                top: 0,
+                                                left: 0,
+                                                width: '100%',
+                                                height: '100%',
+                                                opacity: 0,
+                                                zIndex: 10,
+                                                cursor: 'pointer',
+                                                margin: 0
+                                            }}
                                             checked={settings.options?.autoGenerateAlt ?? true}
                                             onChange={(e) => setSettings({
                                                 ...settings,
                                                 options: { ...settings.options, autoGenerateAlt: e.target.checked }
                                             })}
                                         />
-                                        <div className={`w-10 h-5 rounded-full transition-colors ${settings.options?.autoGenerateAlt ? 'bg-primary' : 'bg-slate-700'}`}>
-                                            <motion.div 
-                                                className="w-3 h-3 bg-white rounded-full absolute top-1 left-1"
+                                        <div className={`w-10 h-5 rounded-full transition-colors ${settings.options?.autoGenerateAlt ? 'bg-primary' : 'bg-slate-700'}`} style={{ width: '100%', height: '100%', position: 'relative', borderRadius: '999px' }}>
+                                            <motion.div
+                                                className="bg-white rounded-full absolute"
                                                 animate={{ x: settings.options?.autoGenerateAlt ? 20 : 0 }}
+                                                style={{ width: '14px', height: '14px', top: '3px', left: '3px', borderRadius: '50%' }}
+                                            />
+                                        </div>
+                                    </div>
+                                </label>
+                                <label className="toggle-label flex items-center justify-between" style={{ userSelect: 'none', cursor: 'pointer' }}>
+                                    <span className="text-sm text-muted">Auto-rename files</span>
+                                    <div className="relative inline-flex items-center cursor-pointer" style={{ width: '40px', height: '20px' }}>
+                                        <input
+                                            type="checkbox"
+                                            style={{
+                                                position: 'absolute',
+                                                top: 0,
+                                                left: 0,
+                                                width: '100%',
+                                                height: '100%',
+                                                opacity: 0,
+                                                zIndex: 10,
+                                                cursor: 'pointer',
+                                                margin: 0
+                                            }}
+                                            checked={settings.options?.autoRename ?? true}
+                                            onChange={(e) => setSettings({
+                                                ...settings,
+                                                options: { ...settings.options, autoRename: e.target.checked }
+                                            })}
+                                        />
+                                        <div className={`w-10 h-5 rounded-full transition-colors ${settings.options?.autoRename ? 'bg-primary' : 'bg-slate-700'}`} style={{ width: '100%', height: '100%', position: 'relative', borderRadius: '999px' }}>
+                                            <motion.div
+                                                className="bg-white rounded-full absolute"
+                                                animate={{ x: settings.options?.autoRename ? 20 : 0 }}
+                                                style={{ width: '14px', height: '14px', top: '3px', left: '3px', borderRadius: '50%' }}
                                             />
                                         </div>
                                     </div>
@@ -392,9 +434,9 @@ const Sidebar = ({ operation, setOperation, settings, setSettings, onProcess, on
                         <span>
                             {operation === 'convert' ? 'Convert Images' :
                                 operation === 'compress' ? 'Compress Images' :
-                                operation === 'upscale' ? 'Upscale Images' :
-                                    operation === 'generate-alt' ? 'Update ALT Tags' :
-                                        'Remove Background'}
+                                    operation === 'upscale' ? 'Upscale Images' :
+                                        operation === 'generate-alt' ? 'Update ALT Tags' :
+                                            'Remove Background'}
                         </span>
                     )}
                 </motion.button>

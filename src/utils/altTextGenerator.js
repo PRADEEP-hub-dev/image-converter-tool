@@ -214,15 +214,41 @@ export const generateAltText = async (file) => {
                 altText = altText.substring(0, 122) + '...';
             }
 
+            // Generate Short SEO Name (suggested filename)
+            let shortName = '';
+            if (contextName) {
+                // If we have a meaningful filename, use it but clean it up
+                shortName = contextName;
+                // Add category if not present
+                if (categorySubjects[fileAnalysis.category] && !shortName.toLowerCase().includes(fileAnalysis.category)) {
+                    // e.g. "sunset-beach" + "landscape" -> "sunset-beach-landscape"
+                    const simpleCat = fileAnalysis.category; // e.g. 'landscape'
+                    shortName = `${shortName} ${simpleCat}`;
+                }
+            } else {
+                // No useful filename, use subject + visual
+                shortName = `${visualString} ${fileAnalysis.category || 'image'}`.trim();
+            }
+
+            // Slugify for filename usage
+            const suggestedName = shortName
+                .toLowerCase()
+                .trim()
+                .replace(/[^\w\s-]/g, '') // Remove non-word chars except spaces and hyphens
+                .replace(/\s+/g, '-')     // Replace spaces with hyphens
+                .replace(/-+/g, '-');     // distinct hyphens
+
             URL.revokeObjectURL(objectUrl);
-            resolve(altText);
+            resolve({ altText, suggestedName });
         };
 
         img.onerror = () => {
             const fileAnalysis = analyzeFilename(file.name);
             const fallbackAlt = fileAnalysis.cleanName || file.name.replace(/\.[^/.]+$/, '') || 'Image';
+            // Simple slugify for fallback
+            const fallbackName = fallbackAlt.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
             URL.revokeObjectURL(objectUrl);
-            resolve(fallbackAlt);
+            resolve({ altText: fallbackAlt, suggestedName: fallbackName });
         };
 
         img.src = objectUrl;

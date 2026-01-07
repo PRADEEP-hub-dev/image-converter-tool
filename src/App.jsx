@@ -28,7 +28,8 @@ function App() {
       optimizeColors: true,
       progressiveEncoding: false,
       stripAlpha: false,
-      autoGenerateAlt: true
+      autoGenerateAlt: true,
+      autoRename: true
     },
     resize: {
       width: '',
@@ -52,27 +53,50 @@ function App() {
       return;
     }
 
-    // Generate ALT text for all new files if enabled
+    // Generate ALT text/Names if enabled
     try {
       let filesWithAltText;
+      // We generate if either feature is on, to save an extra pass if user toggles one later? 
+      // Actually, for now, let's just generate if autoGenerateAlt is on OR autoRename is on.
+      // But generateAltTextBatch does both analysis.
+      const shouldGenerate = settings.options.autoGenerateAlt || settings.options.autoRename;
 
-      if (settings.options.autoGenerateAlt) {
-        const altTexts = await generateAltTextBatch(newFiles);
+      if (shouldGenerate) {
+        const altResults = await generateAltTextBatch(newFiles);
 
-        // Attach ALT text to each file
         filesWithAltText = newFiles.map((file, index) => {
+          const result = altResults[index] || {};
+          // Only apply if the *specific* option is enabled
+          const altText = settings.options.autoGenerateAlt ? (result.altText || file.name.replace(/\.[^/.]+$/, '') || 'Image') : null;
+          // For suggested name, we default to slugified original if the generator failed, but only if autoRename is ON
+          const suggestedName = settings.options.autoRename ? (result.suggestedName || file.name.replace(/\.[^/.]+$/, '').toLowerCase().replace(/\s+/g, '-')) : null;
+
           const fileWithAlt = Object.assign(file, {
-            altText: altTexts[index] || file.name.replace(/\.[^/.]+$/, '') || 'Image'
+            altText: altText || undefined, // undefined keeps it clean if null
+            suggestedName: suggestedName || undefined
           });
           return fileWithAlt;
         });
-        showToast(`${newFiles.length} image${newFiles.length > 1 ? 's' : ''} added with AI ALT text`, 'success');
+
+        const count = newFiles.length;
+        const s = count > 1 ? 's' : '';
+        if (settings.options.autoGenerateAlt && settings.options.autoRename) showToast(`${count} image${s} analyzed (ALT + Name)`, 'success');
+        else if (settings.options.autoGenerateAlt) showToast(`${count} image${s} analyzed (ALT only)`, 'success');
+        else showToast(`${count} image${s} analyzed (Name only)`, 'success');
+
       } else {
+        // No AI generation
         filesWithAltText = newFiles.map(file => {
-          const fileWithAlt = Object.assign(file, {
-            altText: file.name.replace(/\.[^/.]+$/, '') || 'Image'
-          });
-          return fileWithAlt;
+          // We can still provide a basic alt text from filename if we want, but "autoGenerateAlt" implies "Smart/AI" generation usually.
+          // The previous code set altText from filename even in 'else'. Let's keep that behavior for 'altText' as a fallback if desired,
+          // OR if the user expects "No Auto Generate" to mean "Empty ALT". 
+          // Previous behavior: "fallback: file.name". Let's stick to that if 'autoGenerateAlt' is FALSE? 
+          // Actually, if 'autoGenerateAlt' is false, we probably shouldn't set 'altText' at all, or let it be empty so UI doesn't show "Generated: ...".
+          // BUT the UI has logic "file.altText && ...". 
+          // Standard practice: If disabled, maybe don't clutter the UI.
+          // However, for consistency with previous steps, I will set simple filename as altText only if I want to display it.
+          // Let's assume if disabled, we treat it as plain files.
+          return file;
         });
         showToast(`${newFiles.length} image${newFiles.length > 1 ? 's' : ''} added`, 'success');
       }
@@ -80,16 +104,9 @@ function App() {
       setFiles([...files, ...filesWithAltText]);
     } catch (error) {
       console.error('Error generating ALT text:', error);
-      // Fallback: use filename as ALT text
-      const filesWithFallback = newFiles.map(file => {
-        const fileWithAlt = Object.assign(file, {
-          altText: file.name.replace(/\.[^/.]+$/, '') || 'Image'
-        });
-        return fileWithAlt;
-      });
-
-      setFiles([...files, ...filesWithFallback]);
-      showToast(`${newFiles.length} image${newFiles.length > 1 ? 's' : ''} added successfully`, 'success');
+      // Fallback
+      setFiles([...files, ...newFiles]);
+      showToast(`${newFiles.length} image${newFiles.length > 1 ? 's' : ''} added`, 'warning');
     }
   };
 
@@ -106,9 +123,11 @@ function App() {
     try {
       // Special handling for generate-alt as it doesn't create new blobs necessarily
       if (operation === 'generate-alt') {
-        const altTexts = await generateAltTextBatch(files);
+        const altResults = await generateAltTextBatch(files);
         const updatedFiles = files.map((file, index) => {
-          file.altText = altTexts[index];
+          const result = altResults[index] || {};
+          file.altText = result.altText || file.altText;
+          file.suggestedName = result.suggestedName || file.suggestedName;
           return file;
         });
         setFiles(updatedFiles);
@@ -123,7 +142,8 @@ function App() {
           dimensions: 'Same',
           previewUrl: URL.createObjectURL(file),
           originalPreviewUrl: URL.createObjectURL(file),
-          altText: file.altText
+          altText: file.altText,
+          suggestedName: file.suggestedName
         }));
         setProcessedFiles(results);
         setMode('results');
@@ -206,14 +226,14 @@ function App() {
                 onReset={handleReset}
               />
             ) : (
-                <motion.div
-                  key="workspace"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                  style={{ display: 'flex', flexDirection: 'column', gap: '2rem', padding: '10px', overflow: 'visible' }}
-                >
+              <motion.div
+                key="workspace"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                style={{ display: 'flex', flexDirection: 'column', gap: '2rem', padding: '10px', overflow: 'visible' }}
+              >
                 {files.length === 0 ? (
                   <UploadArea onFilesSelected={handleFilesSelected} />
                 ) : (
@@ -236,7 +256,6 @@ function App() {
                                 padding: '8px 20px',
                                 background: 'var(--error)',
                                 color: 'white',
-                                border: 'none',
                                 borderRadius: '10px',
                                 cursor: 'pointer',
                                 fontWeight: 600,

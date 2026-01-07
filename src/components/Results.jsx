@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Download, ArrowLeft, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -11,9 +10,68 @@ import ImagePreviewModal from './ImagePreviewModal';
 
 const Results = ({ processedFiles, onReset }) => {
     const [previewFile, setPreviewFile] = useState(null);
+    // State to track which files should use ALT text as filename
+    const [useAltForFilename, setUseAltForFilename] = useState({});
+
+    React.useEffect(() => {
+        if (processedFiles && processedFiles.length > 0) {
+            const initialState = {};
+            processedFiles.forEach((file, index) => {
+                if (file.suggestedName) {
+                    initialState[index] = true;
+                }
+            });
+            setUseAltForFilename(initialState);
+        }
+    }, [processedFiles]);
+
     const totalOriginal = processedFiles.reduce((acc, f) => acc + f.originalSize, 0);
     const totalProcessed = processedFiles.reduce((acc, f) => acc + f.processedSize, 0);
     const savings = ((totalOriginal - totalProcessed) / totalOriginal * 100).toFixed(1);
+
+    const toggleAltSelection = (index) => {
+        setUseAltForFilename(prev => ({
+            ...prev,
+            [index]: !prev[index]
+        }));
+    };
+
+    const slugify = (text) => {
+        return text
+            .toString()
+            .toLowerCase()
+            .trim()
+            .replace(/\s+/g, '-')     // Replace spaces with -
+            .replace(/[^\w\-]+/g, '') // Remove all non-word chars
+            .replace(/\-\-+/g, '-');  // Replace multiple - with single -
+    };
+
+    const getDownloadFilename = (file, index) => {
+        const useAlt = useAltForFilename[index];
+        let filename = file.fileName || `processed_image_${index}`;
+
+        // Determine extension
+        let ext = 'jpg';
+        if (filename.includes('.')) {
+            ext = filename.split('.').pop();
+        } else if (file.processed.type) {
+            ext = file.processed.type.split('/')[1] || 'jpg';
+        }
+
+        if (useAlt) {
+            if (file.suggestedName) {
+                filename = `${file.suggestedName}.${ext}`;
+            } else if (file.altText) {
+                const slug = slugify(file.altText);
+                const safeSlug = slug.substring(0, 100);
+                if (safeSlug) {
+                    filename = `${safeSlug}.${ext}`;
+                }
+            }
+        }
+
+        return filename;
+    };
 
     const downloadFile = async (file, index = 0) => {
         try {
@@ -26,7 +84,7 @@ const Results = ({ processedFiles, onReset }) => {
             const link = document.createElement('a');
             link.style.display = 'none';
             link.href = url;
-            link.download = file.fileName || `processed_image_${index}.jpg`;
+            link.download = getDownloadFilename(file, index);
 
             document.body.appendChild(link);
             link.click();
@@ -44,12 +102,7 @@ const Results = ({ processedFiles, onReset }) => {
         const zip = new JSZip();
 
         processedFiles.forEach((file, index) => {
-            // Ensure fileName has an extension, if not add one based on type
-            let name = file.fileName || `processed_image_${index + 1}`;
-            if (!name.includes('.')) {
-                const ext = file.processed.type.split('/')[1] || 'jpg';
-                name = `${name}.${ext}`;
-            }
+            const name = getDownloadFilename(file, index);
             zip.file(name, file.processed);
         });
 
@@ -158,32 +211,61 @@ const Results = ({ processedFiles, onReset }) => {
                                 <span className="text-xs text-muted font-mono">{file.dimensions}</span>
                             </div>
 
+                            {file.suggestedName && (
+                                <div style={{ marginBottom: '0.75rem', display: 'flex', alignItems: 'center' }}>
+                                    <label
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            cursor: 'pointer',
+                                            fontSize: '0.8rem', // Increased font size slightly
+                                            userSelect: 'none',
+                                            color: useAltForFilename[index] ? 'var(--success)' : 'var(--text-muted)'
+                                        }}
+                                        className="hover:text-white transition-colors"
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={!!useAltForFilename[index]}
+                                            onChange={() => toggleAltSelection(index)}
+                                            style={{ cursor: 'pointer', accentColor: 'var(--success)', width: '16px', height: '16px' }}
+                                        />
+                                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '220px' }}>
+                                            Rename to: <strong>{file.suggestedName}</strong>
+                                        </span>
+                                    </label>
+                                </div>
+                            )}
+
                             <div className="flex justify-between items-center text-sm" style={{ marginBottom: '0.75rem' }}>
                                 <span className="text-muted" style={{ textDecoration: 'line-through' }}>{formatFileSize(file.originalSize)}</span>
                                 <span className="text-success font-bold">{formatFileSize(file.processedSize)}</span>
                             </div>
 
                             {file.altText && (
-                                <div
-                                    className="text-xs"
-                                    style={{
-                                        marginBottom: '1rem',
-                                        padding: '6px 10px',
-                                        background: 'rgba(99, 102, 241, 0.1)',
-                                        borderRadius: '6px',
-                                        border: '1px solid rgba(99, 102, 241, 0.2)',
-                                        color: 'var(--text-main)',
-                                        fontStyle: 'italic',
-                                        display: 'flex',
-                                        gap: '6px'
-                                    }}
-                                >
-                                    <span style={{ opacity: 0.7 }}>🏷️</span>
-                                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={`Generated ALT: ${file.altText}`}>
-                                        {file.altText}
-                                    </span>
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <div
+                                        className="text-xs"
+                                        style={{
+                                            padding: '6px 10px',
+                                            background: 'rgba(99, 102, 241, 0.1)',
+                                            borderRadius: '6px',
+                                            border: '1px solid rgba(99, 102, 241, 0.2)',
+                                            color: 'var(--text-main)',
+                                            fontStyle: 'italic',
+                                            display: 'flex',
+                                            gap: '6px'
+                                        }}
+                                    >
+                                        <span style={{ opacity: 0.7 }}>🏷️</span>
+                                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={`Generated ALT: ${file.altText}`}>
+                                            {file.altText}
+                                        </span>
+                                    </div>
                                 </div>
                             )}
+
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => setPreviewFile(file)}
@@ -204,7 +286,7 @@ const Results = ({ processedFiles, onReset }) => {
                         </div>
                     </motion.div>
                 ))}
-            </div>
+            </div >
 
             {previewFile && (
                 <ImagePreviewModal
@@ -212,7 +294,7 @@ const Results = ({ processedFiles, onReset }) => {
                     onClose={() => setPreviewFile(null)}
                 />
             )}
-        </motion.div>
+        </motion.div >
     );
 };
 
